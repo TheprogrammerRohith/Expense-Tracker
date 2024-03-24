@@ -2,63 +2,76 @@ package com.example.expensetracker;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link IncomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.example.expensetracker.Model.Data;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
+
 public class IncomeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private FirebaseAuth Auth;
+    private DatabaseReference incomeData;
+    private RecyclerView recyclerView;
+    MyAdapter myAdapter;
+    ArrayList<Data> list;
+    private TextView income_result;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
-    public IncomeFragment() {
-        // Required empty public constructor
+        View view = inflater.inflate(R.layout.fragment_income, container, false);
+        recyclerView=view.findViewById(R.id.income_recycler_view);
+        Auth=FirebaseAuth.getInstance();
+        FirebaseUser user=Auth.getCurrentUser();
+        String uid=user.getUid();
+        incomeData=FirebaseDatabase.getInstance().getReference().child("Income").child(uid);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        list=new ArrayList<>();
+        myAdapter=new MyAdapter(getContext(),list);
+        recyclerView.setAdapter(myAdapter);
+        income_result=view.findViewById(R.id.income_result);
+
+        incomeData.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int i_total_value=0;
+                for(DataSnapshot ds:snapshot.getChildren()){
+                    Data data=ds.getValue(Data.class);
+                    i_total_value=i_total_value+data.getAmount();
+                    list.add(data);
+                }
+                income_result.setText(String.valueOf(i_total_value));
+                myAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+        return view;
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment IncomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static IncomeFragment newInstance(String param1, String param2) {
-        IncomeFragment fragment = new IncomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_income, container, false);
-    }
 }

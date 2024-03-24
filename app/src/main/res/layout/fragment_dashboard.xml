@@ -59,7 +59,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:textAppearanceLarge"
-                        android:text="0000.00">
+                        android:text="0000.00"
+                        android:textColor="@color/income_text">
                     </TextView>
                 </RelativeLayout>
                 <RelativeLayout
@@ -72,7 +73,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:textAppearanceLarge"
-                        android:text="0000.00">
+                        android:text="0000.00"
+                        android:textColor="@color/expense_text">
                     </TextView>
                 </RelativeLayout>
 
